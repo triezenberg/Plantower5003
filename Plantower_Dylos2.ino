@@ -1,4 +1,4 @@
-// 07/05/18
+// 07/19/18
 // Listens to Dylos then Plantower
 // Shows both results
 
@@ -39,22 +39,31 @@ void setup()
   }
   plantower.begin(9600);
   dylos.begin(9600);
+  dylos.listen();
+  while (dylos.available() == 0)
+  {
+    Serial.print("*"); 
+    delay(dylosWaitTime); 
+  }
+  Serial.println("Dylos first report done.  Now enter the loop.");
 }
 
 void loop()
 {
   dylosShows = "";
   plantowerShows = "";
+  plantower.listen();
+  plantowerShows = getPlantower();
   dylos.listen();
-  Serial.println(); 
+ // Serial.println(); 
   while (dylos.available() == 0)
   {
-    Serial.print("*"); 
+    // Serial.print("*"); 
     delay(dylosWaitTime); 
   }
   String dylosSends = getDylos();
   dylosShows = convertDylos(dylosSends, ',', 100/28.3);
-  plantowerShows = getPlantower();
+  
   showSave();
 }
 
@@ -129,7 +138,7 @@ String getPlantower()
     }
     currentTime = millis();
     elapsedTime = currentTime - startTime;
-    if (elapsedTime > 40000)
+    if (elapsedTime > 50000)
     {
         break;
     } 
@@ -155,7 +164,7 @@ String getPlantower()
 
 void showSave()
 {
-  String dataString = plantowerShows +  "," + "," + dylosShows + ",";
+  String dataString = plantowerShows +  "," + "," + dylosShows;
   Serial.println(dataString);
   File comparePM = SD.open("PM.txt", FILE_WRITE);
   comparePM.println(dataString);  comparePM.close();
